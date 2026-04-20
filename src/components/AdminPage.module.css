@@ -1,0 +1,288 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 1.5rem;
+  height: 52px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.backBtn:hover { border-color: var(--border2); color: var(--text); }
+
+.headerTitle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.body {
+  flex: 1;
+  padding: 1.5rem;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text3);
+  font-weight: 400;
+}
+
+.newUserForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 16px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 11px;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.12s;
+  flex: 1;
+  min-width: 120px;
+}
+.input::placeholder { color: var(--text3); }
+.input:focus { border-color: var(--accent2); }
+
+.passWrap {
+  position: relative;
+  flex: 1;
+  min-width: 120px;
+}
+.passWrap .input { width: 100%; padding-right: 32px; }
+
+.eyeBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  transition: color 0.12s;
+}
+.eyeBtn:hover { color: var(--text2); }
+
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 7px;
+  border: 1px solid var(--accent2);
+  background: var(--accent);
+  color: #0a0b0d;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s;
+  flex-shrink: 0;
+}
+.addBtn:hover:not(:disabled) { background: #00ffb3; }
+.addBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.errorText {
+  font-size: 12px;
+  color: var(--red);
+  width: 100%;
+}
+
+.userList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.userCard {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.userCardOpen { border-color: var(--border2); }
+
+.userRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+}
+
+.userAvatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.userName {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.editBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 5px;
+  transition: color 0.12s, background 0.12s;
+}
+.editBtn:hover { color: var(--accent); background: var(--accent-dim); }
+
+.deleteBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 5px;
+  transition: color 0.12s, background 0.12s;
+  flex-shrink: 0;
+}
+.deleteBtn:hover { color: var(--red); background: var(--red-dim); }
+
+.editForm {
+  border-top: 1px solid var(--border);
+  padding: 12px 14px;
+  background: var(--bg);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.editActions {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.cancelBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font);
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.cancelBtn:hover { border-color: var(--red); color: var(--red); }
+
+.saveBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--accent2);
+  background: var(--accent);
+  color: #0a0b0d;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.saveBtn:hover:not(:disabled) { background: #00ffb3; }
+.saveBtn:disabled { opacity: 0.4; cursor: not-allowed; }
