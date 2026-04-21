@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Users, Plus, Trash2, Eye, EyeOff, Shield, Pencil, Check, X } from 'lucide-react'
+import { ArrowLeft, Users, Plus, Trash2, Eye, EyeOff, Shield, Pencil, Check, X, Building2 } from 'lucide-react'
 import { useI18n } from '../i18n/index.jsx'
 import UserMenu from './UserMenu'
 import styles from './AdminPage.module.css'
@@ -14,15 +14,26 @@ export default function AdminPage({ session, onBack, onLogout }) {
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  // edit state
+  // user edit state
   const [editId, setEditId] = useState(null)
   const [editForm, setEditForm] = useState({ username: '', password: '' })
   const [showEditPass, setShowEditPass] = useState(false)
   const [editError, setEditError] = useState('')
   const [editSaving, setEditSaving] = useState(false)
 
+  // dealer list state
+  const [dealerList, setDealerList] = useState([])
+  const [dealerForm, setDealerForm] = useState('')
+  const [dealerError, setDealerError] = useState('')
+  const [dealerSaving, setDealerSaving] = useState(false)
+  const [dealerEditId, setDealerEditId] = useState(null)
+  const [dealerEditName, setDealerEditName] = useState('')
+  const [dealerEditSaving, setDealerEditSaving] = useState(false)
+  const [dealerEditError, setDealerEditError] = useState('')
+
   useEffect(() => {
     fetch(`${API}/api/users`).then(r => r.json()).then(setUsers)
+    fetch(`${API}/api/dealer-list`).then(r => r.json()).then(setDealerList)
   }, [])
 
   const createUser = async (e) => {
@@ -94,6 +105,54 @@ export default function AdminPage({ session, onBack, onLogout }) {
     }
   }
 
+  const addDealer = async (e) => {
+    e.preventDefault()
+    if (!dealerForm.trim()) return
+    setDealerSaving(true)
+    setDealerError('')
+    const res = await fetch(`${API}/api/dealer-list`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: dealerForm.trim() }),
+    })
+    const data = await res.json()
+    setDealerSaving(false)
+    if (!res.ok) { setDealerError(data.error); return }
+    setDealerList(prev => [...prev, data])
+    setDealerForm('')
+  }
+
+  const startDealerEdit = (dl) => {
+    setDealerEditId(dl.id)
+    setDealerEditName(dl.name)
+    setDealerEditError('')
+  }
+
+  const cancelDealerEdit = () => { setDealerEditId(null); setDealerEditError('') }
+
+  const saveDealerEdit = async (dl) => {
+    if (!dealerEditName.trim()) return
+    setDealerEditSaving(true)
+    setDealerEditError('')
+    const res = await fetch(`${API}/api/dealer-list/${dl.id}`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: dealerEditName.trim() }),
+    })
+    const data = await res.json()
+    setDealerEditSaving(false)
+    if (!res.ok) { setDealerEditError(data.error); return }
+    setDealerList(prev => prev.map(d => d.id === dl.id ? { ...d, name: dealerEditName.trim() } : d))
+    cancelDealerEdit()
+  }
+
+  const deleteDealer = async (id) => {
+    if (!confirm(t('admin.confirm_delete_dealer'))) return
+    await fetch(`${API}/api/dealer-list/${id}`, { method: 'DELETE' })
+    setDealerList(prev => prev.filter(d => d.id !== id))
+    if (dealerEditId === id) cancelDealerEdit()
+  }
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -144,6 +203,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
           {/* Kullanıcı listesi */}
           <div className={styles.userList}>
             {users.map(user => (
+
               <div key={user.id} className={[styles.userCard, editId === user.id ? styles.userCardOpen : ''].join(' ')}>
                 {/* Satır başlığı */}
                 <div className={styles.userRow}>
@@ -191,6 +251,74 @@ export default function AdminPage({ session, onBack, onLogout }) {
                         <X size={13} /> {t('common.cancel')}
                       </button>
                       <button className={styles.saveBtn} onClick={() => saveEdit(user)} disabled={editSaving}>
+                        <Check size={13} /> {t('common.save')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Bayi Listesi ── */}
+        <section className={styles.section}>
+          <div className={styles.sectionHead}>
+            <Building2 size={15} />
+            <span>{t('admin.dealer_list')}</span>
+            <span className={styles.badge}>{dealerList.length}</span>
+          </div>
+
+          {/* Yeni bayi formu */}
+          <form className={styles.newUserForm} onSubmit={addDealer}>
+            <input
+              className={styles.input}
+              placeholder={t('admin.dealer_name_placeholder')}
+              value={dealerForm}
+              onChange={e => setDealerForm(e.target.value)}
+            />
+            {dealerError && <span className={styles.errorText}>{dealerError}</span>}
+            <button className={styles.addBtn} type="submit" disabled={dealerSaving || !dealerForm.trim()}>
+              <Plus size={14} /> {t('admin.add_dealer')}
+            </button>
+          </form>
+
+          {/* Bayi listesi */}
+          <div className={styles.userList}>
+            {dealerList.map(dl => (
+              <div key={dl.id} className={[styles.userCard, dealerEditId === dl.id ? styles.userCardOpen : ''].join(' ')}>
+                <div className={styles.userRow}>
+                  <div className={styles.userAvatar}><Building2 size={13} /></div>
+                  <span className={styles.userName}>{dl.name}</span>
+                  <div className={styles.userActions}>
+                    {dealerEditId !== dl.id && (
+                      <button className={styles.editBtn} onClick={() => startDealerEdit(dl)} title={t('common.edit')}>
+                        <Pencil size={13} />
+                      </button>
+                    )}
+                    {dealerEditId !== dl.id && (
+                      <button className={styles.deleteBtn} onClick={() => deleteDealer(dl.id)} title={t('common.delete')}>
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {dealerEditId === dl.id && (
+                  <div className={styles.editForm}>
+                    <input
+                      className={styles.input}
+                      placeholder={t('admin.dealer_name_placeholder')}
+                      value={dealerEditName}
+                      onChange={e => setDealerEditName(e.target.value)}
+                      autoFocus
+                    />
+                    {dealerEditError && <span className={styles.errorText}>{dealerEditError}</span>}
+                    <div className={styles.editActions}>
+                      <button className={styles.cancelBtn} onClick={cancelDealerEdit}>
+                        <X size={13} /> {t('common.cancel')}
+                      </button>
+                      <button className={styles.saveBtn} onClick={() => saveDealerEdit(dl)} disabled={dealerEditSaving}>
                         <Check size={13} /> {t('common.save')}
                       </button>
                     </div>

@@ -102,6 +102,10 @@ export default {
     new_password_placeholder: 'Yeni şifre (değiştirmek için)',
     user_created: 'Kullanıcı oluşturulamadı.',
     confirm_delete_user: 'Bu kullanıcıyı silmek istediğinize emin misiniz?',
+    dealer_list: 'Bayi Listesi',
+    add_dealer: 'Bayi Ekle',
+    dealer_name_placeholder: 'Bayi adı',
+    confirm_delete_dealer: 'Bu bayiyi silmek istediğinize emin misiniz?',
   },
 
   // Menü

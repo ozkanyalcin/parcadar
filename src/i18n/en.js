@@ -102,6 +102,10 @@ export default {
     new_password_placeholder: 'New password (leave blank to keep)',
     user_created: 'Could not create user.',
     confirm_delete_user: 'Are you sure you want to delete this user?',
+    dealer_list: 'Dealer List',
+    add_dealer: 'Add Dealer',
+    dealer_name_placeholder: 'Dealer name',
+    confirm_delete_dealer: 'Are you sure you want to delete this dealer?',
   },
 
   // Menu

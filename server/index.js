@@ -201,6 +201,23 @@ app.post('/api/dealer-list', async (req, res) => {
   }
 })
 
+/** PUT /api/dealer-list/:id – { name } */
+app.put('/api/dealer-list/:id', async (req, res) => {
+  const { name } = req.body
+  if (!name?.trim()) return res.status(400).json({ error: 'name zorunlu.' })
+  try {
+    const { rowCount } = await pool.query(
+      'UPDATE dealer_list SET name = $1 WHERE id = $2',
+      [name.trim(), req.params.id]
+    )
+    if (!rowCount) return res.status(404).json({ error: 'Bayi bulunamadı.' })
+    res.json({ ok: true })
+  } catch (e) {
+    if (e.code === '23505') return res.status(409).json({ error: 'Bu bayi adı zaten mevcut.' })
+    throw e
+  }
+})
+
 /** DELETE /api/dealer-list/:id */
 app.delete('/api/dealer-list/:id', async (req, res) => {
   await pool.query('DELETE FROM dealer_list WHERE id = $1', [req.params.id])
