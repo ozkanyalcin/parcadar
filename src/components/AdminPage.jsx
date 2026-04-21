@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { ArrowLeft, Users, Plus, Trash2, Eye, EyeOff, Shield, Pencil, Check, X } from 'lucide-react'
+import { useI18n } from '../i18n/index.jsx'
 import UserMenu from './UserMenu'
 import styles from './AdminPage.module.css'
 
 const API = import.meta.env.VITE_API_URL || ''
 
 export default function AdminPage({ session, onBack, onLogout }) {
+  const { t } = useI18n()
   const [users, setUsers] = useState([])
   const [form, setForm] = useState({ username: '', password: '' })
   const [showPass, setShowPass] = useState(false)
@@ -41,7 +43,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
   }
 
   const deleteUser = async (id) => {
-    if (!confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) return
+    if (!confirm(t('admin.confirm_delete_user'))) return
     await fetch(`${API}/api/users/${id}`, { method: 'DELETE' })
     setUsers(prev => prev.filter(u => u.id !== id))
     if (editId === id) setEditId(null)
@@ -60,7 +62,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
   }
 
   const saveEdit = async (user) => {
-    if (!editForm.username.trim()) { setEditError('Kullanıcı adı boş olamaz.'); return }
+    if (!editForm.username.trim()) { setEditError(t('auth.username_empty')); return }
     setEditSaving(true)
     setEditError('')
 
@@ -100,7 +102,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
         </button>
         <div className={styles.headerTitle}>
           <Shield size={15} />
-          Admin Paneli
+          {t('admin.title')}
         </div>
         <UserMenu session={session} onOpenSettings={() => {}} onLogout={onLogout} />
       </header>
@@ -109,7 +111,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
         <section className={styles.section}>
           <div className={styles.sectionHead}>
             <Users size={15} />
-            <span>Kullanıcılar</span>
+            <span>{t('admin.users')}</span>
             <span className={styles.badge}>{users.length}</span>
           </div>
 
@@ -117,7 +119,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
           <form className={styles.newUserForm} onSubmit={createUser}>
             <input
               className={styles.input}
-              placeholder="Kullanıcı adı"
+              placeholder={t('auth.username')}
               value={form.username}
               onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
             />
@@ -125,7 +127,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
               <input
                 className={styles.input}
                 type={showPass ? 'text' : 'password'}
-                placeholder="Şifre"
+                placeholder={t('auth.password')}
                 value={form.password}
                 onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
               />
@@ -135,7 +137,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
             </div>
             {error && <span className={styles.errorText}>{error}</span>}
             <button className={styles.addBtn} type="submit" disabled={saving || !form.username.trim() || !form.password}>
-              <Plus size={14} /> Kullanıcı Ekle
+              <Plus size={14} /> {t('admin.add_user')}
             </button>
           </form>
 
@@ -175,7 +177,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
                       <input
                         className={styles.input}
                         type={showEditPass ? 'text' : 'password'}
-                        placeholder="Yeni şifre (değiştirmek için)"
+                        placeholder={t('admin.new_password_placeholder')}
                         value={editForm.password}
                         onChange={e => setEditForm(p => ({ ...p, password: e.target.value }))}
                       />
@@ -186,7 +188,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
                     {editError && <span className={styles.errorText}>{editError}</span>}
                     <div className={styles.editActions}>
                       <button className={styles.cancelBtn} onClick={cancelEdit}>
-                        <X size={13} /> İptal
+                        <X size={13} /> {t('common.cancel')}
                       </button>
                       <button className={styles.saveBtn} onClick={() => saveEdit(user)} disabled={editSaving}>
                         <Check size={13} /> Kaydet

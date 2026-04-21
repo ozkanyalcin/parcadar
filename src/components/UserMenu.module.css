@@ -121,3 +121,30 @@
 
 .dropItemLogout { color: var(--red); }
 .dropItemLogout:hover { background: var(--red-dim); color: var(--red); }
+
+.langRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+}
+
+.langIcon { color: var(--text3); flex-shrink: 0; }
+
+.langBtn {
+  font-family: var(--font);
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.langBtn:hover { border-color: var(--border2); color: var(--text); }
+.langBtnActive {
+  border-color: var(--accent2);
+  background: var(--accent-dim);
+  color: var(--accent);
+}

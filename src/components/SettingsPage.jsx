@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ArrowLeft, Eye, EyeOff, Check, Settings, Wifi, WifiOff, Loader, ShieldCheck, Plus, Trash2, Building2 } from 'lucide-react'
 import { authenticate, verifyOtp, getStoredToken, clearToken } from '../lib/dinamikOtoAuth'
 import { loadDealers, saveDealer, deleteDealer } from '../lib/credentials'
+import { useI18n } from '../i18n/index.jsx'
 import UserMenu from './UserMenu'
 import styles from './SettingsPage.module.css'
 
@@ -14,6 +15,7 @@ function slugify(name) {
 }
 
 export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin }) {
+  const { t } = useI18n()
   const [dealerList, setDealerList] = useState([])   // tüm bayi tipleri
   const [myDealers, setMyDealers] = useState([])     // kullanıcının kayıtlı bayileri
   const [loading, setLoading] = useState(true)
@@ -53,7 +55,7 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
   const addDealer = async (e) => {
     e.preventDefault()
     if (!form.dealerListId || !form.dealer_username.trim() || !form.username.trim() || !form.password) {
-      setFormError('Tüm alanları doldurun.')
+      setFormError(t('settings.fill_all'))
       return
     }
     setSaving(true)
@@ -113,7 +115,7 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: 'var(--text3)' }}>
-      Yükleniyor...
+      {t('common.loading')}
     </div>
   )
 
@@ -121,14 +123,14 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
     <div className={styles.page}>
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={onBack}>
-          <ArrowLeft size={16} /> Geri
+          <ArrowLeft size={16} /> {t("common.back")}
         </button>
         <div className={styles.headerTitle}>
           <Settings size={15} />
-          B2B Bağlantı Ayarları
+          {t("settings.title")}
         </div>
         <div className={styles.headerStats}>
-          <span className={styles.statPill}>{myDealers.length} bayi</span>
+          <span className={styles.statPill}>{t("settings.dealer_count", { count: myDealers.length })}</span>
           <UserMenu session={session} onOpenSettings={() => {}} onOpenAdmin={onOpenAdmin} onLogout={onLogout} />
         </div>
       </header>
@@ -156,11 +158,11 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                       </div>
                     </div>
                     <div className={styles.sourceActions}>
-                      {auth.state === 'ok' && <span className={styles.connectedBadge}><Wifi size={10} /> Bağlı</span>}
+                      {auth.state === 'ok' && <span className={styles.connectedBadge}><Wifi size={10} /> {t('settings.connected')}</span>}
                       {(auth.state === 'otp' || auth.state === 'otp_loading') && (
-                        <span className={styles.otpBadge}><ShieldCheck size={10} /> OTP Bekleniyor</span>
+                        <span className={styles.otpBadge}><ShieldCheck size={10} /> {t('settings.otp_waiting')}</span>
                       )}
-                      {auth.state === 'error' && <span className={styles.errorBadge}><WifiOff size={10} /> Hata</span>}
+                      {auth.state === 'error' && <span className={styles.errorBadge}><WifiOff size={10} /> {t('common.error')}</span>}
                       {isDinamikOto && auth.state !== 'otp' && auth.state !== 'otp_loading' && (
                         <button
                           className={[styles.connectBtn, auth.state === 'ok' ? styles.connectBtnOk : '', auth.state === 'loading' ? styles.connectBtnLoading : ''].join(' ')}
@@ -168,11 +170,11 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                           disabled={auth.state === 'loading'}
                         >
                           {auth.state === 'loading' ? (
-                            <><Loader size={13} className={styles.spin} /> Bağlanıyor...</>
+                            <><Loader size={13} className={styles.spin} /> {t('settings.connecting')}</>
                           ) : auth.state === 'ok' ? (
-                            <><Wifi size={13} /> Yeniden Bağlan</>
+                            <><Wifi size={13} /> {t('settings.reconnect')}</>
                           ) : (
-                            <><Wifi size={13} /> Bağlan</>
+                            <><Wifi size={13} /> {t('settings.connect')}</>
                           )}
                         </button>
                       )}
@@ -189,7 +191,7 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                         <div className={styles.otpHeader}>
                           <ShieldCheck size={15} className={styles.otpIcon} />
                           <div>
-                            <div className={styles.otpTitle}>Doğrulama Kodu Gerekiyor</div>
+                            <div className={styles.otpTitle}>{t("settings.otp_title")}</div>
                             <div className={styles.otpDesc}>{auth.message}</div>
                           </div>
                         </div>
@@ -211,13 +213,13 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                             onClick={() => submitOtp(dealer.slug)}
                             disabled={auth.state === 'otp_loading' || (otpInputs[dealer.slug] || '').length < 4}
                           >
-                            {auth.state === 'otp_loading' ? <Loader size={14} className={styles.spin} /> : 'Doğrula'}
+                            {auth.state === 'otp_loading' ? <Loader size={14} className={styles.spin} /> : t('settings.otp_verify')}
                           </button>
                           <button
                             className={styles.otpCancelBtn}
                             onClick={() => setAuthStatus(prev => ({ ...prev, [dealer.slug]: { state: 'idle' } }))}
                           >
-                            İptal
+                            
                           </button>
                         </div>
                       </div>
@@ -240,27 +242,27 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
         {/* ── Bayi ekle formu ── */}
         {availableDealers.length > 0 && (
           <div className={styles.addDealerSection}>
-            <div className={styles.addDealerTitle}><Plus size={14} /> Bayi Ekle</div>
+            <div className={styles.addDealerTitle}><Plus size={14} /> {t('settings.add_dealer')}</div>
             <form className={styles.addDealerForm} onSubmit={addDealer}>
               <select
                 className={styles.select}
                 value={form.dealerListId}
                 onChange={e => setForm(p => ({ ...p, dealerListId: e.target.value }))}
               >
-                <option value="">Bayi seçin...</option>
+                <option value="">{t('settings.select_dealer')}</option>
                 {availableDealers.map(dl => (
                   <option key={dl.id} value={dl.id}>{dl.name}</option>
                 ))}
               </select>
               <input
                 className={styles.input}
-                placeholder="Bayi kullanıcı adı"
+                placeholder={t('settings.dealer_username')}
                 value={form.dealer_username}
                 onChange={e => setForm(p => ({ ...p, dealer_username: e.target.value }))}
               />
               <input
                 className={styles.input}
-                placeholder="Kullanıcı adı"
+                placeholder={t('settings.login_username')}
                 value={form.username}
                 onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
               />
@@ -268,7 +270,7 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                 <input
                   className={[styles.input, styles.passInput].join(' ')}
                   type={showPass ? 'text' : 'password'}
-                  placeholder="Şifre"
+                  placeholder={t('auth.password')}
                   value={form.password}
                   onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
                 />
@@ -285,7 +287,7 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
         )}
 
         {myDealers.length === 0 && availableDealers.length === 0 && (
-          <div className={styles.empty}>Tanımlı bayi bulunmuyor. Lütfen admin panelinden bayi ekleyin.</div>
+          <div className={styles.empty}>{t('settings.no_dealer')}</div>
         )}
 
       </div>
