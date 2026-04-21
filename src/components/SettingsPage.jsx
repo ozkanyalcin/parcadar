@@ -214,6 +214,21 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                         <span className={styles.otpBadge}><ShieldCheck size={10} /> {t('settings.otp_waiting')}</span>
                       )}
                       {auth.state === 'error' && <span className={styles.errorBadge}><WifiOff size={10} /> {t('common.error')}</span>}
+                      {auth.state !== 'otp' && auth.state !== 'otp_loading' && (
+                        <button
+                          className={[styles.connectBtn, dealer.connected ? styles.connectBtnOk : styles.connectBtnMuted, auth.state === 'loading' ? styles.connectBtnLoading : ''].join(' ')}
+                          onClick={e => { e.stopPropagation(); connect(dealer) }}
+                          disabled={auth.state === 'loading'}
+                        >
+                          {auth.state === 'loading' ? (
+                            <><Loader size={13} className={styles.spin} /> {t('settings.connecting')}</>
+                          ) : dealer.connected ? (
+                            <><Wifi size={13} /> {t('settings.connected')}</>
+                          ) : (
+                            <><Wifi size={13} /> {t('settings.connect')}</>
+                          )}
+                        </button>
+                      )}
                       <button className={styles.removeBtn} onClick={e => { e.stopPropagation(); removeDealer(dealer.slug) }}>
                         <Trash2 size={14} />
                       </button>
@@ -285,29 +300,6 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                           </div>
                           <button className={styles.editCredBtn} onClick={() => startEdit(dealer)}>
                             <Pencil size={13} /> {t('common.edit')}
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Bağlan butonu — tüm bayiler */}
-                      {auth.state !== 'otp' && auth.state !== 'otp_loading' && (
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                          <button
-                            className={[
-                              styles.connectBtn,
-                              dealer.connected ? styles.connectBtnOk : styles.connectBtnMuted,
-                              auth.state === 'loading' ? styles.connectBtnLoading : '',
-                            ].join(' ')}
-                            onClick={() => connect(dealer)}
-                            disabled={auth.state === 'loading'}
-                          >
-                            {auth.state === 'loading' ? (
-                              <><Loader size={13} className={styles.spin} /> {t('settings.connecting')}</>
-                            ) : dealer.connected ? (
-                              <><Wifi size={13} /> {t('settings.connected')}</>
-                            ) : (
-                              <><Wifi size={13} /> {t('settings.connect')}</>
-                            )}
                           </button>
                         </div>
                       )}
