@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ArrowLeft, Eye, EyeOff, Check, Settings, Wifi, WifiOff, Loader, ShieldCheck, Plus, Trash2, Building2, ChevronDown, Pencil, X } from 'lucide-react'
 import { authenticate, verifyOtp, getStoredToken, clearToken } from '../lib/dinamikOtoAuth'
-import { loadDealers, saveDealer, deleteDealer } from '../lib/credentials'
+import { loadDealers, saveDealer, deleteDealer, setDealerConnected } from '../lib/credentials'
 import { useI18n } from '../i18n/index.jsx'
 import UserMenu from './UserMenu'
 import styles from './SettingsPage.module.css'
@@ -40,13 +40,19 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
       setDealerList(dl)
       const list = Object.entries(dealers).map(([slug, d]) => ({ slug, ...d }))
       setMyDealers(list)
+      // DB'deki connected değerine göre başlangıç auth durumunu set et
+      const initialAuth = {}
+      for (const [slug, d] of Object.entries(dealers)) {
+        if (d.connected) initialAuth[slug] = { state: 'ok', message: 'Bağlı' }
+      }
+      // Dinamik Oto için session token varsa mesajı güncelle
+      const token = getStoredToken()
+      if (token && initialAuth[DINAMIK_OTO_ID]) {
+        initialAuth[DINAMIK_OTO_ID].message = `${token.username} olarak bağlandı`
+      }
+      setAuthStatus(initialAuth)
       setLoading(false)
     })
-
-    const token = getStoredToken()
-    if (token) {
-      setAuthStatus(prev => ({ ...prev, [DINAMIK_OTO_ID]: { state: 'ok', message: `${token.username} olarak bağlandı` } }))
-    }
   }, [session.id])
 
   const availableDealers = dealerList.filter(
@@ -98,15 +104,21 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
           setOtpInputs(prev => ({ ...prev, [slug]: '' }))
           return
         }
+        await setDealerConnected(session.id, slug, true)
+        setMyDealers(prev => prev.map(d => d.slug === slug ? { ...d, connected: true } : d))
         setAuthStatus(prev => ({ ...prev, [slug]: { state: 'ok', message: `${result.tokenData.username} olarak bağlandı` } }))
       } catch (err) {
+        await setDealerConnected(session.id, slug, false)
+        setMyDealers(prev => prev.map(d => d.slug === slug ? { ...d, connected: false } : d))
         setAuthStatus(prev => ({ ...prev, [slug]: { state: 'error', message: err.message } }))
       }
       return
     }
 
-    // Diğer bayiler: kimlik bilgileri kaydedildi
+    // Diğer bayiler
     await new Promise(r => setTimeout(r, 600))
+    await setDealerConnected(session.id, slug, true)
+    setMyDealers(prev => prev.map(d => d.slug === slug ? { ...d, connected: true } : d))
     setAuthStatus(prev => ({ ...prev, [slug]: { state: 'ok', message: `${dealer.dealer_username} olarak yapılandırıldı` } }))
   }
 
@@ -143,6 +155,8 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
     setAuthStatus(prev => ({ ...prev, [slug]: { ...auth, state: 'otp_loading' } }))
     try {
       const result = await verifyOtp({ otpCode, otpReference: auth.otpReference, ctx: auth.ctx })
+      await setDealerConnected(session.id, slug, true)
+      setMyDealers(prev => prev.map(d => d.slug === slug ? { ...d, connected: true } : d))
       setAuthStatus(prev => ({ ...prev, [slug]: { state: 'ok', message: `${result.tokenData.username} olarak bağlandı` } }))
     } catch (err) {
       setAuthStatus(prev => ({ ...prev, [slug]: { ...auth, state: 'otp', error: err.message } }))
@@ -280,14 +294,18 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                       {auth.state !== 'otp' && auth.state !== 'otp_loading' && (
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                           <button
-                            className={[styles.connectBtn, auth.state === 'ok' ? styles.connectBtnOk : '', auth.state === 'loading' ? styles.connectBtnLoading : ''].join(' ')}
+                            className={[
+                              styles.connectBtn,
+                              dealer.connected ? styles.connectBtnOk : styles.connectBtnMuted,
+                              auth.state === 'loading' ? styles.connectBtnLoading : '',
+                            ].join(' ')}
                             onClick={() => connect(dealer)}
                             disabled={auth.state === 'loading'}
                           >
                             {auth.state === 'loading' ? (
                               <><Loader size={13} className={styles.spin} /> {t('settings.connecting')}</>
-                            ) : auth.state === 'ok' ? (
-                              <><Wifi size={13} /> {t('settings.reconnect')}</>
+                            ) : dealer.connected ? (
+                              <><Wifi size={13} /> {t('settings.connected')}</>
                             ) : (
                               <><Wifi size={13} /> {t('settings.connect')}</>
                             )}

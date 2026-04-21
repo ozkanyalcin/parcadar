@@ -8,6 +8,7 @@ export async function loadDealers(userId) {
     dealer_username: r.dealer_username,
     username: r.username,
     password: r.password,
+    connected: r.connected,
     enabled: true,
   }]))
 }
@@ -17,6 +18,14 @@ export async function saveDealer(userId, dealerName, { dealer_username, username
     method: 'PUT',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ dealer_username, username, password, dealer_id }),
+  })
+}
+
+export async function setDealerConnected(userId, dealerName, connected) {
+  await fetch(`${API}/api/users/${userId}/dealers/${dealerName}/connected`, {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ connected }),
   })
 }
 

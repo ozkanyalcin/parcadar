@@ -34,10 +34,12 @@ async function initDb() {
       dealer_username VARCHAR(100) NOT NULL,
       username        VARCHAR(100) NOT NULL,
       password        VARCHAR(255) NOT NULL,
+      connected       BOOLEAN NOT NULL DEFAULT FALSE,
       created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       UNIQUE (user_id, dealer_name)
     )
   `)
+  await pool.query(`ALTER TABLE dealers ADD COLUMN IF NOT EXISTS connected BOOLEAN NOT NULL DEFAULT FALSE`)
 
   // Varsayılan admin kullanıcısı
   const hash = crypto.createHash('sha256').update('admin123').digest('hex')
@@ -133,7 +135,7 @@ app.delete('/api/users/:id', async (req, res) => {
 /** GET /api/users/:userId/dealers */
 app.get('/api/users/:userId/dealers', async (req, res) => {
   const { rows } = await pool.query(
-    'SELECT id, dealer_name, dealer_username, username, password FROM dealers WHERE user_id = $1 ORDER BY dealer_name',
+    'SELECT id, dealer_name, dealer_username, username, password, connected FROM dealers WHERE user_id = $1 ORDER BY dealer_name',
     [req.params.userId]
   )
   res.json(rows)
@@ -154,6 +156,16 @@ app.put('/api/users/:userId/dealers/:dealerName', async (req, res) => {
     [userId, dealerName, dealer_username || '', username, password, dealer_id || null]
   )
   res.json(rows[0])
+})
+
+/** PATCH /api/users/:userId/dealers/:dealerName/connected – { connected: bool } */
+app.patch('/api/users/:userId/dealers/:dealerName/connected', async (req, res) => {
+  const { connected } = req.body
+  await pool.query(
+    'UPDATE dealers SET connected = $1 WHERE user_id = $2 AND dealer_name = $3',
+    [!!connected, req.params.userId, req.params.dealerName]
+  )
+  res.json({ ok: true })
 })
 
 /** DELETE /api/users/:userId/dealers/:dealerName */
