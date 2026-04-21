@@ -205,7 +205,6 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                         <div className={styles.sourceName}>{dealer.dealer_username}</div>
                         <div className={styles.sourceMeta}>
                           <span className={styles.sourceId}>{dealer.username}</span>
-                          {isDinamikOto && <span className={styles.authTypeBadge}>JWT Auth</span>}
                         </div>
                       </div>
                     </div>
