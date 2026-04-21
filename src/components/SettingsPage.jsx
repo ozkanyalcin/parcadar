@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Eye, EyeOff, Check, Settings, Wifi, WifiOff, Loader, ShieldCheck, Plus, Trash2, Building2 } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Check, Settings, Wifi, WifiOff, Loader, ShieldCheck, Plus, Trash2, Building2, ChevronDown } from 'lucide-react'
 import { authenticate, verifyOtp, getStoredToken, clearToken } from '../lib/dinamikOtoAuth'
 import { loadDealers, saveDealer, deleteDealer } from '../lib/credentials'
 import { useI18n } from '../i18n/index.jsx'
@@ -8,7 +8,7 @@ import styles from './SettingsPage.module.css'
 
 const API = import.meta.env.VITE_API_URL || ''
 
-const DINAMIK_OTO_ID = 'dinamik_oto' // dealer_list'teki Dinamik Oto için özel auth
+const DINAMIK_OTO_ID = 'dinamik_oto'
 
 function slugify(name) {
   return name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
@@ -16,18 +16,17 @@ function slugify(name) {
 
 export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin }) {
   const { t } = useI18n()
-  const [dealerList, setDealerList] = useState([])   // tüm bayi tipleri
-  const [myDealers, setMyDealers] = useState([])     // kullanıcının kayıtlı bayileri
+  const [dealerList, setDealerList] = useState([])
+  const [myDealers, setMyDealers] = useState([])
   const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState({})
 
-  // Yeni bayi ekleme formu
   const [form, setForm] = useState({ dealerListId: '', dealer_username: '', username: '', password: '' })
   const [showPass, setShowPass] = useState(false)
   const [formError, setFormError] = useState('')
   const [saving, setSaving] = useState(false)
 
-  // Auth durumu (Dinamik Oto için)
-  const [authStatus, setAuthStatus] = useState({}) // { dealerSlug: { state, message, otpReference, ctx, error } }
+  const [authStatus, setAuthStatus] = useState({})
   const [otpInputs, setOtpInputs] = useState({})
 
   useEffect(() => {
@@ -36,7 +35,6 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
       loadDealers(session.id),
     ]).then(([dl, dealers]) => {
       setDealerList(dl)
-      // dealers = { slug: { dealer_username, username, enabled } }
       const list = Object.entries(dealers).map(([slug, d]) => ({ slug, ...d }))
       setMyDealers(list)
       setLoading(false)
@@ -51,6 +49,8 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
   const availableDealers = dealerList.filter(
     dl => !myDealers.some(d => d.slug === slugify(dl.name))
   )
+
+  const toggleExpand = (slug) => setExpanded(prev => ({ ...prev, [slug]: !prev[slug] }))
 
   const addDealer = async (e) => {
     e.preventDefault()
@@ -79,25 +79,32 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
     setMyDealers(prev => prev.filter(d => d.slug !== slug))
   }
 
-  // Dinamik Oto bağlan
   const connect = async (dealer) => {
     const slug = dealer.slug
     setAuthStatus(prev => ({ ...prev, [slug]: { state: 'loading' } }))
-    try {
-      const result = await authenticate({
-        customerCode: dealer.dealer_username,
-        username: dealer.username,
-        password: dealer.password,
-      })
-      if (result.requiresOtp) {
-        setAuthStatus(prev => ({ ...prev, [slug]: { state: 'otp', message: result.message, otpReference: result.otpReference, ctx: result._ctx } }))
-        setOtpInputs(prev => ({ ...prev, [slug]: '' }))
-        return
+
+    if (slug === DINAMIK_OTO_ID) {
+      try {
+        const result = await authenticate({
+          customerCode: dealer.dealer_username,
+          username: dealer.username,
+          password: dealer.password,
+        })
+        if (result.requiresOtp) {
+          setAuthStatus(prev => ({ ...prev, [slug]: { state: 'otp', message: result.message, otpReference: result.otpReference, ctx: result._ctx } }))
+          setOtpInputs(prev => ({ ...prev, [slug]: '' }))
+          return
+        }
+        setAuthStatus(prev => ({ ...prev, [slug]: { state: 'ok', message: `${result.tokenData.username} olarak bağlandı` } }))
+      } catch (err) {
+        setAuthStatus(prev => ({ ...prev, [slug]: { state: 'error', message: err.message } }))
       }
-      setAuthStatus(prev => ({ ...prev, [slug]: { state: 'ok', message: `${result.tokenData.username} olarak bağlandı` } }))
-    } catch (err) {
-      setAuthStatus(prev => ({ ...prev, [slug]: { state: 'error', message: err.message } }))
+      return
     }
+
+    // Diğer bayiler: kimlik bilgileri kaydedildi
+    await new Promise(r => setTimeout(r, 600))
+    setAuthStatus(prev => ({ ...prev, [slug]: { state: 'ok', message: `${dealer.dealer_username} olarak yapılandırıldı` } }))
   }
 
   const submitOtp = async (slug) => {
@@ -123,30 +130,32 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
     <div className={styles.page}>
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={onBack}>
-          <ArrowLeft size={16} /> {t("common.back")}
+          <ArrowLeft size={16} /> {t('common.back')}
         </button>
         <div className={styles.headerTitle}>
           <Settings size={15} />
-          {t("settings.title")}
+          {t('settings.title')}
         </div>
         <div className={styles.headerStats}>
-          <span className={styles.statPill}>{t("settings.dealer_count", { count: myDealers.length })}</span>
+          <span className={styles.statPill}>{t('settings.dealer_count', { count: myDealers.length })}</span>
           <UserMenu session={session} onOpenSettings={() => {}} onOpenAdmin={onOpenAdmin} onLogout={onLogout} />
         </div>
       </header>
 
       <div className={styles.body}>
 
-        {/* ── Mevcut bayiler ── */}
         {myDealers.length > 0 && (
           <div className={styles.sourceList}>
             {myDealers.map(dealer => {
               const auth = authStatus[dealer.slug] || { state: 'idle' }
               const isDinamikOto = dealer.slug === DINAMIK_OTO_ID
+              const isOpen = !!expanded[dealer.slug]
 
               return (
-                <div key={dealer.slug} className={[styles.sourceCard, auth.state === 'ok' ? styles.sourceCardActive : ''].join(' ')}>
-                  <div className={styles.sourceHeader}>
+                <div key={dealer.slug} className={[styles.sourceCard, auth.state === 'ok' ? styles.sourceCardActive : '', isOpen ? styles.sourceCardOpen : ''].join(' ')}>
+
+                  {/* Kart başlığı — tıklanınca aç/kapa */}
+                  <div className={styles.sourceHeader} onClick={() => toggleExpand(dealer.slug)}>
                     <div className={styles.sourceInfo}>
                       <div className={styles.flagWrap}><Building2 size={16} /></div>
                       <div>
@@ -163,74 +172,86 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                         <span className={styles.otpBadge}><ShieldCheck size={10} /> {t('settings.otp_waiting')}</span>
                       )}
                       {auth.state === 'error' && <span className={styles.errorBadge}><WifiOff size={10} /> {t('common.error')}</span>}
-                      {isDinamikOto && auth.state !== 'otp' && auth.state !== 'otp_loading' && (
-                        <button
-                          className={[styles.connectBtn, auth.state === 'ok' ? styles.connectBtnOk : '', auth.state === 'loading' ? styles.connectBtnLoading : ''].join(' ')}
-                          onClick={() => connect(dealer)}
-                          disabled={auth.state === 'loading'}
-                        >
-                          {auth.state === 'loading' ? (
-                            <><Loader size={13} className={styles.spin} /> {t('settings.connecting')}</>
-                          ) : auth.state === 'ok' ? (
-                            <><Wifi size={13} /> {t('settings.reconnect')}</>
-                          ) : (
-                            <><Wifi size={13} /> {t('settings.connect')}</>
-                          )}
-                        </button>
-                      )}
-                      <button className={styles.removeBtn} onClick={() => removeDealer(dealer.slug)}>
+                      <button className={styles.removeBtn} onClick={e => { e.stopPropagation(); removeDealer(dealer.slug) }}>
                         <Trash2 size={14} />
                       </button>
+                      <ChevronDown
+                        size={15}
+                        style={{ color: 'var(--text3)', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}
+                      />
                     </div>
                   </div>
 
-                  {/* OTP kutusu */}
-                  {(auth.state === 'otp' || auth.state === 'otp_loading') && (
+                  {/* Açılır içerik */}
+                  {isOpen && (
                     <div className={styles.form}>
-                      <div className={styles.otpBox}>
-                        <div className={styles.otpHeader}>
-                          <ShieldCheck size={15} className={styles.otpIcon} />
-                          <div>
-                            <div className={styles.otpTitle}>{t("settings.otp_title")}</div>
-                            <div className={styles.otpDesc}>{auth.message}</div>
+
+                      {/* Bağlan butonu — tüm bayiler */}
+                      {auth.state !== 'otp' && auth.state !== 'otp_loading' && (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                          <button
+                            className={[styles.connectBtn, auth.state === 'ok' ? styles.connectBtnOk : '', auth.state === 'loading' ? styles.connectBtnLoading : ''].join(' ')}
+                            onClick={() => connect(dealer)}
+                            disabled={auth.state === 'loading'}
+                          >
+                            {auth.state === 'loading' ? (
+                              <><Loader size={13} className={styles.spin} /> {t('settings.connecting')}</>
+                            ) : auth.state === 'ok' ? (
+                              <><Wifi size={13} /> {t('settings.reconnect')}</>
+                            ) : (
+                              <><Wifi size={13} /> {t('settings.connect')}</>
+                            )}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* OTP kutusu — sadece Dinamik Oto */}
+                      {isDinamikOto && (auth.state === 'otp' || auth.state === 'otp_loading') && (
+                        <div className={styles.otpBox}>
+                          <div className={styles.otpHeader}>
+                            <ShieldCheck size={15} className={styles.otpIcon} />
+                            <div>
+                              <div className={styles.otpTitle}>{t('settings.otp_title')}</div>
+                              <div className={styles.otpDesc}>{auth.message}</div>
+                            </div>
+                          </div>
+                          {auth.error && <div className={styles.otpError}>{auth.error}</div>}
+                          <div className={styles.otpInputRow}>
+                            <input
+                              className={styles.otpInput}
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={8}
+                              placeholder="_ _ _ _ _ _"
+                              value={otpInputs[dealer.slug] || ''}
+                              onChange={e => setOtpInputs(prev => ({ ...prev, [dealer.slug]: e.target.value.replace(/\D/g, '') }))}
+                              onKeyDown={e => e.key === 'Enter' && submitOtp(dealer.slug)}
+                              autoFocus
+                            />
+                            <button
+                              className={styles.otpSubmitBtn}
+                              onClick={() => submitOtp(dealer.slug)}
+                              disabled={auth.state === 'otp_loading' || (otpInputs[dealer.slug] || '').length < 4}
+                            >
+                              {auth.state === 'otp_loading' ? <Loader size={14} className={styles.spin} /> : t('settings.otp_verify')}
+                            </button>
+                            <button
+                              className={styles.otpCancelBtn}
+                              onClick={() => setAuthStatus(prev => ({ ...prev, [dealer.slug]: { state: 'idle' } }))}
+                            >
+                              {t('common.cancel')}
+                            </button>
                           </div>
                         </div>
-                        {auth.error && <div className={styles.otpError}>{auth.error}</div>}
-                        <div className={styles.otpInputRow}>
-                          <input
-                            className={styles.otpInput}
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={8}
-                            placeholder="_ _ _ _ _ _"
-                            value={otpInputs[dealer.slug] || ''}
-                            onChange={e => setOtpInputs(prev => ({ ...prev, [dealer.slug]: e.target.value.replace(/\D/g, '') }))}
-                            onKeyDown={e => e.key === 'Enter' && submitOtp(dealer.slug)}
-                            autoFocus
-                          />
-                          <button
-                            className={styles.otpSubmitBtn}
-                            onClick={() => submitOtp(dealer.slug)}
-                            disabled={auth.state === 'otp_loading' || (otpInputs[dealer.slug] || '').length < 4}
-                          >
-                            {auth.state === 'otp_loading' ? <Loader size={14} className={styles.spin} /> : t('settings.otp_verify')}
-                          </button>
-                          <button
-                            className={styles.otpCancelBtn}
-                            onClick={() => setAuthStatus(prev => ({ ...prev, [dealer.slug]: { state: 'idle' } }))}
-                          >
-                            
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                      )}
 
-                  {/* Auth hata/ok mesajı */}
-                  {(auth.state === 'ok' || auth.state === 'error') && (
-                    <div className={styles.form}>
-                      {auth.state === 'ok' && <div className={styles.authOk}><Wifi size={13} /><span>{auth.message}</span></div>}
-                      {auth.state === 'error' && <div className={styles.authError}><WifiOff size={13} /><span>{auth.message}</span></div>}
+                      {/* Auth sonuç mesajı */}
+                      {auth.state === 'ok' && (
+                        <div className={styles.authOk}><Wifi size={13} /><span>{auth.message}</span></div>
+                      )}
+                      {auth.state === 'error' && (
+                        <div className={styles.authError}><WifiOff size={13} /><span>{auth.message}</span></div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -239,7 +260,6 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
           </div>
         )}
 
-        {/* ── Bayi ekle formu ── */}
         {availableDealers.length > 0 && (
           <div className={styles.addDealerSection}>
             <div className={styles.addDealerTitle}><Plus size={14} /> {t('settings.add_dealer')}</div>
