@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Zap } from 'lucide-react'
+import { loadDealers } from '../lib/credentials'
 import UserMenu from './UserMenu'
 import styles from './SearchPage.module.css'
 
@@ -12,6 +13,11 @@ const EXAMPLES = [
 
 export default function SearchPage({ session, onSearch, onOpenSettings, onOpenAdmin, onLogout }) {
   const [query, setQuery] = useState('')
+  const [dealerCount, setDealerCount] = useState(0)
+
+  useEffect(() => {
+    loadDealers(session.id).then(dealers => setDealerCount(Object.keys(dealers).length))
+  }, [session.id])
 
   const submit = () => {
     const q = query.trim()
@@ -37,7 +43,7 @@ export default function SearchPage({ session, onSearch, onOpenSettings, onOpenAd
           </div>
           <div>
             <div className={styles.logoText}>Parça<span>Radar</span></div>
-            <div className={styles.logoSub}>2 B2B kaynaktan anlık fiyat ve stok karşılaştırma</div>
+            <div className={styles.logoSub}>{dealerCount} B2B kaynaktan anlık fiyat ve stok karşılaştırma</div>
           </div>
         </div>
 
