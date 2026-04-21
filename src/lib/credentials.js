@@ -7,6 +7,7 @@ export async function loadDealers(userId) {
   return Object.fromEntries(rows.map(r => [r.dealer_name, {
     dealer_username: r.dealer_username,
     username: r.username,
+    password: r.password,
     enabled: true,
   }]))
 }

@@ -133,7 +133,7 @@ app.delete('/api/users/:id', async (req, res) => {
 /** GET /api/users/:userId/dealers */
 app.get('/api/users/:userId/dealers', async (req, res) => {
   const { rows } = await pool.query(
-    'SELECT id, dealer_name, dealer_username, username FROM dealers WHERE user_id = $1 ORDER BY dealer_name',
+    'SELECT id, dealer_name, dealer_username, username, password FROM dealers WHERE user_id = $1 ORDER BY dealer_name',
     [req.params.userId]
   )
   res.json(rows)

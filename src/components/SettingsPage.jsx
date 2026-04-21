@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Eye, EyeOff, Check, Settings, Wifi, WifiOff, Loader, ShieldCheck, Plus, Trash2, Building2, ChevronDown } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Check, Settings, Wifi, WifiOff, Loader, ShieldCheck, Plus, Trash2, Building2, ChevronDown, Pencil, X } from 'lucide-react'
 import { authenticate, verifyOtp, getStoredToken, clearToken } from '../lib/dinamikOtoAuth'
 import { loadDealers, saveDealer, deleteDealer } from '../lib/credentials'
 import { useI18n } from '../i18n/index.jsx'
@@ -20,6 +20,9 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
   const [myDealers, setMyDealers] = useState([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState({})
+  const [showPassMap, setShowPassMap] = useState({})
+  const [editMap, setEditMap] = useState({})   // { slug: { dealer_username, username, password } }
+  const [editSaving, setEditSaving] = useState({})
 
   const [form, setForm] = useState({ dealerListId: '', dealer_username: '', username: '', password: '' })
   const [showPass, setShowPass] = useState(false)
@@ -107,6 +110,32 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
     setAuthStatus(prev => ({ ...prev, [slug]: { state: 'ok', message: `${dealer.dealer_username} olarak yapılandırıldı` } }))
   }
 
+  const startEdit = (dealer) => {
+    setEditMap(p => ({ ...p, [dealer.slug]: { dealer_username: dealer.dealer_username, username: dealer.username, password: dealer.password || '' } }))
+  }
+
+  const cancelEdit = (slug) => {
+    setEditMap(p => { const n = { ...p }; delete n[slug]; return n })
+  }
+
+  const saveEdit = async (dealer) => {
+    const ef = editMap[dealer.slug]
+    if (!ef.dealer_username.trim() || !ef.username.trim() || !ef.password) return
+    setEditSaving(p => ({ ...p, [dealer.slug]: true }))
+    await saveDealer(session.id, dealer.slug, {
+      dealer_username: ef.dealer_username.trim(),
+      username: ef.username.trim(),
+      password: ef.password,
+      dealer_id: dealer.dealer_id,
+    })
+    setMyDealers(prev => prev.map(d => d.slug === dealer.slug
+      ? { ...d, dealer_username: ef.dealer_username.trim(), username: ef.username.trim(), password: ef.password }
+      : d
+    ))
+    cancelEdit(dealer.slug)
+    setEditSaving(p => ({ ...p, [dealer.slug]: false }))
+  }
+
   const submitOtp = async (slug) => {
     const auth = authStatus[slug]
     const otpCode = otpInputs[slug] || ''
@@ -186,21 +215,68 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                   {isOpen && (
                     <div className={styles.form}>
 
-                      {/* Kayıtlı kimlik bilgileri */}
-                      <div className={styles.credGrid}>
-                        <div className={styles.credField}>
-                          <span className={styles.credLabel}>{t('settings.dealer_username')}</span>
-                          <span className={styles.credValue}>{dealer.dealer_username}</span>
+                      {/* Kayıtlı kimlik bilgileri / Edit formu */}
+                      {editMap[dealer.slug] ? (
+                        <div className={styles.editCredForm}>
+                          <input
+                            className={styles.input}
+                            placeholder={t('settings.dealer_username')}
+                            value={editMap[dealer.slug].dealer_username}
+                            onChange={e => setEditMap(p => ({ ...p, [dealer.slug]: { ...p[dealer.slug], dealer_username: e.target.value } }))}
+                          />
+                          <input
+                            className={styles.input}
+                            placeholder={t('settings.login_username')}
+                            value={editMap[dealer.slug].username}
+                            onChange={e => setEditMap(p => ({ ...p, [dealer.slug]: { ...p[dealer.slug], username: e.target.value } }))}
+                          />
+                          <div className={styles.passWrap}>
+                            <input
+                              className={[styles.input, styles.passInput].join(' ')}
+                              type={showPassMap[dealer.slug] ? 'text' : 'password'}
+                              placeholder={t('auth.password')}
+                              value={editMap[dealer.slug].password}
+                              onChange={e => setEditMap(p => ({ ...p, [dealer.slug]: { ...p[dealer.slug], password: e.target.value } }))}
+                            />
+                            <button type="button" className={styles.eyeBtn} onClick={() => setShowPassMap(p => ({ ...p, [dealer.slug]: !p[dealer.slug] }))}>
+                              {showPassMap[dealer.slug] ? <EyeOff size={13} /> : <Eye size={13} />}
+                            </button>
+                          </div>
+                          <div className={styles.editCredActions}>
+                            <button className={styles.cancelEditBtn} onClick={() => cancelEdit(dealer.slug)}>
+                              <X size={13} /> {t('common.cancel')}
+                            </button>
+                            <button className={styles.saveBtn} onClick={() => saveEdit(dealer)} disabled={editSaving[dealer.slug]}>
+                              {editSaving[dealer.slug] ? <Loader size={13} className={styles.spin} /> : <><Check size={13} /> {t('common.save')}</>}
+                            </button>
+                          </div>
                         </div>
-                        <div className={styles.credField}>
-                          <span className={styles.credLabel}>{t('settings.login_username')}</span>
-                          <span className={styles.credValue}>{dealer.username}</span>
+                      ) : (
+                        <div className={styles.credGrid}>
+                          <div className={styles.credField}>
+                            <span className={styles.credLabel}>{t('settings.dealer_username')}</span>
+                            <span className={styles.credValue}>{dealer.dealer_username}</span>
+                          </div>
+                          <div className={styles.credField}>
+                            <span className={styles.credLabel}>{t('settings.login_username')}</span>
+                            <span className={styles.credValue}>{dealer.username}</span>
+                          </div>
+                          <div className={styles.credField}>
+                            <span className={styles.credLabel}>{t('auth.password')}</span>
+                            <span className={styles.credValuePass}>
+                              <span className={styles.credValue}>
+                                {showPassMap[dealer.slug] ? (dealer.password || '—') : '••••••••'}
+                              </span>
+                              <button className={styles.credEyeBtn} onClick={() => setShowPassMap(p => ({ ...p, [dealer.slug]: !p[dealer.slug] }))}>
+                                {showPassMap[dealer.slug] ? <EyeOff size={13} /> : <Eye size={13} />}
+                              </button>
+                            </span>
+                          </div>
+                          <button className={styles.editCredBtn} onClick={() => startEdit(dealer)}>
+                            <Pencil size={13} /> {t('common.edit')}
+                          </button>
                         </div>
-                        <div className={styles.credField}>
-                          <span className={styles.credLabel}>{t('auth.password')}</span>
-                          <span className={styles.credValue}>••••••••</span>
-                        </div>
-                      </div>
+                      )}
 
                       {/* Bağlan butonu — tüm bayiler */}
                       {auth.state !== 'otp' && auth.state !== 'otp_loading' && (

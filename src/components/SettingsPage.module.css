@@ -632,6 +632,69 @@
   color: var(--text2);
 }
 
+.credValuePass {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.credEyeBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  transition: color 0.12s;
+}
+.credEyeBtn:hover { color: var(--text2); }
+
+.editCredBtn {
+  font-family: var(--font);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.12s;
+  align-self: flex-end;
+}
+.editCredBtn:hover { border-color: var(--border2); color: var(--text2); }
+
+.editCredForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editCredActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.cancelEditBtn {
+  font-family: var(--font);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.cancelEditBtn:hover { border-color: var(--red); color: var(--red); }
+
 .empty {
   text-align: center;
   color: var(--text3);
