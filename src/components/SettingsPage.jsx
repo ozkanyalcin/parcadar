@@ -217,7 +217,7 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
 
                       {/* Kayıtlı kimlik bilgileri / Edit formu */}
                       {editMap[dealer.slug] ? (
-                        <div className={styles.editCredForm}>
+                        <div className={styles.addDealerForm}>
                           <input
                             className={styles.input}
                             placeholder={t('settings.dealer_username')}
@@ -242,14 +242,12 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                               {showPassMap[dealer.slug] ? <EyeOff size={13} /> : <Eye size={13} />}
                             </button>
                           </div>
-                          <div className={styles.editCredActions}>
-                            <button className={styles.cancelEditBtn} onClick={() => cancelEdit(dealer.slug)}>
-                              <X size={13} /> {t('common.cancel')}
-                            </button>
-                            <button className={styles.saveBtn} onClick={() => saveEdit(dealer)} disabled={editSaving[dealer.slug]}>
-                              {editSaving[dealer.slug] ? <Loader size={13} className={styles.spin} /> : <><Check size={13} /> {t('common.save')}</>}
-                            </button>
-                          </div>
+                          <button className={styles.cancelEditBtn} onClick={() => cancelEdit(dealer.slug)}>
+                            <X size={13} /> {t('common.cancel')}
+                          </button>
+                          <button className={styles.saveBtn} onClick={() => saveEdit(dealer)} disabled={editSaving[dealer.slug]}>
+                            {editSaving[dealer.slug] ? <Loader size={13} className={styles.spin} /> : <><Check size={13} /> {t('common.save')}</>}
+                          </button>
                         </div>
                       ) : (
                         <div className={styles.credGrid}>

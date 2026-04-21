@@ -667,18 +667,6 @@
 }
 .editCredBtn:hover { border-color: var(--border2); color: var(--text2); }
 
-.editCredForm {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.editCredActions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
 .cancelEditBtn {
   font-family: var(--font);
   font-size: 12px;
