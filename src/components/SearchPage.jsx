@@ -62,7 +62,7 @@ export default function SearchPage({ session, onSearch, onOpenSettings, onOpenAd
         </div>
 
         <div className={styles.examples}>
-          <span className={styles.exLabel}>Örnek aramalar:</span>
+          <span className={styles.exLabel}>{t('search.examples_label')}</span>
           {examples.map(ex => (
             <button key={ex.value} className={styles.exChip} onClick={() => setQuery(ex.value)}>
               <span className={styles.exType}>{ex.label}</span>
@@ -72,11 +72,11 @@ export default function SearchPage({ session, onSearch, onOpenSettings, onOpenAd
         </div>
 
         <div className={styles.stats}>
-          <div className={styles.stat}><span className={styles.statNum}>{dealerCount}</span><span className={styles.statLabel}>B2B kaynak</span></div>
+          <div className={styles.stat}><span className={styles.statNum}>{dealerCount}</span><span className={styles.statLabel}>{t('search.stat_sources')}</span></div>
           <div className={styles.statDivider} />
-          <div className={styles.stat}><span className={styles.statNum}>~3sn</span><span className={styles.statLabel}>ortalama sorgu</span></div>
+          <div className={styles.stat}><span className={styles.statNum}>~3sn</span><span className={styles.statLabel}>{t('search.stat_avg_query')}</span></div>
           <div className={styles.statDivider} />
-          <div className={styles.stat}><span className={styles.statNum}>anlık</span><span className={styles.statLabel}>stok bilgisi</span></div>
+          <div className={styles.stat}><span className={styles.statNum}>{t('search.stat_realtime')}</span><span className={styles.statLabel}>{t('search.stat_stock')}</span></div>
         </div>
       </div>
     </div>

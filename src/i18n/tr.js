@@ -35,12 +35,17 @@ export default {
     placeholder: 'Parça kodu, OEM numarası veya ürün adı...',
     button: 'Ara',
     subtitle: '{count} B2B kaynaktan anlık fiyat ve stok karşılaştırma',
+    examples_label: 'Örnek aramalar:',
     examples: {
       oem: 'OEM kodu',
       brand: 'Marka kodu',
       name: 'Parça adı',
       ate: 'ATE kodu',
     },
+    stat_sources: 'B2B kaynak',
+    stat_avg_query: 'ortalama sorgu',
+    stat_realtime: 'anlık',
+    stat_stock: 'stok bilgisi',
   },
 
   // Sonuçlar

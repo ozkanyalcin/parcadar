@@ -98,7 +98,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
     <div className={styles.page}>
       <header className={styles.header}>
         <button className={styles.backBtn} onClick={onBack}>
-          <ArrowLeft size={16} /> Geri
+          <ArrowLeft size={16} /> {t('common.back')}
         </button>
         <div className={styles.headerTitle}>
           <Shield size={15} />
@@ -151,7 +151,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
                   <span className={styles.userName}>{user.username}</span>
                   <div className={styles.userActions}>
                     {editId !== user.id && (
-                      <button className={styles.editBtn} onClick={() => startEdit(user)} title="Düzenle">
+                      <button className={styles.editBtn} onClick={() => startEdit(user)} title={t('common.edit')}>
                         <Pencil size={13} />
                       </button>
                     )}
@@ -191,7 +191,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
                         <X size={13} /> {t('common.cancel')}
                       </button>
                       <button className={styles.saveBtn} onClick={() => saveEdit(user)} disabled={editSaving}>
-                        <Check size={13} /> Kaydet
+                        <Check size={13} /> {t('common.save')}
                       </button>
                     </div>
                   </div>

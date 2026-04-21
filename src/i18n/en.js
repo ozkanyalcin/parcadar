@@ -35,12 +35,17 @@ export default {
     placeholder: 'Part code, OEM number or product name...',
     button: 'Search',
     subtitle: 'Real-time price & stock comparison from {count} B2B sources',
+    examples_label: 'Example searches:',
     examples: {
       oem: 'OEM code',
       brand: 'Brand code',
       name: 'Part name',
       ate: 'ATE code',
     },
+    stat_sources: 'B2B sources',
+    stat_avg_query: 'avg query time',
+    stat_realtime: 'real-time',
+    stat_stock: 'stock info',
   },
 
   // Results

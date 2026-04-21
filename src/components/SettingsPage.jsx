@@ -280,7 +280,7 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
               </div>
               {formError && <span className={styles.formError}>{formError}</span>}
               <button className={styles.saveBtn} type="submit" disabled={saving}>
-                {saving ? <Loader size={13} className={styles.spin} /> : <><Check size={13} /> Kaydet</>}
+                {saving ? <Loader size={13} className={styles.spin} /> : <><Check size={13} /> {t('common.save')}</>}
               </button>
             </form>
           </div>
