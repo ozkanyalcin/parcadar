@@ -50,6 +50,10 @@ export default function App() {
   }
 
   if (page === 'admin') {
+    if (session.username !== 'admin') {
+      setPage('search')
+      return null
+    }
     return (
       <AdminPage
         session={session}

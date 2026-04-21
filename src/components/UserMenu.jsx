@@ -28,7 +28,7 @@ export default function UserMenu({ session, onOpenSettings, onOpenAdmin, onLogou
             <div className={styles.dropAvatar}><User size={16} /></div>
             <div>
               <div className={styles.dropName}>{session.username}</div>
-              <div className={styles.dropRole}>{t('auth.role_admin')}</div>
+              <div className={styles.dropRole}>{session.username === 'admin' ? t('auth.role_admin') : t('auth.role_user')}</div>
             </div>
           </div>
           <div className={styles.divider} />
@@ -52,7 +52,7 @@ export default function UserMenu({ session, onOpenSettings, onOpenAdmin, onLogou
             <Settings size={14} />
             {t('menu.settings')}
           </button>
-          {onOpenAdmin && (
+          {onOpenAdmin && session.username === 'admin' && (
             <button className={styles.dropItem} onClick={() => { setOpen(false); onOpenAdmin() }}>
               <Shield size={14} />
               {t('menu.admin')}
