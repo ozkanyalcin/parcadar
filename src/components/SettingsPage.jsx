@@ -186,6 +186,22 @@ export default function SettingsPage({ session, onBack, onLogout, onOpenAdmin })
                   {isOpen && (
                     <div className={styles.form}>
 
+                      {/* Kayıtlı kimlik bilgileri */}
+                      <div className={styles.credGrid}>
+                        <div className={styles.credField}>
+                          <span className={styles.credLabel}>{t('settings.dealer_username')}</span>
+                          <span className={styles.credValue}>{dealer.dealer_username}</span>
+                        </div>
+                        <div className={styles.credField}>
+                          <span className={styles.credLabel}>{t('settings.login_username')}</span>
+                          <span className={styles.credValue}>{dealer.username}</span>
+                        </div>
+                        <div className={styles.credField}>
+                          <span className={styles.credLabel}>{t('auth.password')}</span>
+                          <span className={styles.credValue}>••••••••</span>
+                        </div>
+                      </div>
+
                       {/* Bağlan butonu — tüm bayiler */}
                       {auth.state !== 'otp' && auth.state !== 'otp_loading' && (
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
