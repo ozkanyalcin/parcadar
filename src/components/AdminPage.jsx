@@ -6,7 +6,7 @@ import styles from './AdminPage.module.css'
 
 const API = import.meta.env.VITE_API_URL || ''
 
-export default function AdminPage({ session, onBack, onLogout }) {
+export default function AdminPage({ session, onBack, onLogout, onOpenSettings }) {
   const { t } = useI18n()
   const [users, setUsers] = useState([])
   const [form, setForm] = useState({ username: '', password: '' })
@@ -163,7 +163,7 @@ export default function AdminPage({ session, onBack, onLogout }) {
           <Shield size={15} />
           {t('admin.title')}
         </div>
-        <UserMenu session={session} onOpenSettings={() => {}} onLogout={onLogout} />
+        <UserMenu session={session} onOpenSettings={onOpenSettings} onLogout={onLogout} />
       </header>
 
       <div className={styles.body}>

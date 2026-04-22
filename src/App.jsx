@@ -59,6 +59,7 @@ export default function App() {
         session={session}
         onBack={() => setPage(searching ? 'results' : 'search')}
         onLogout={handleLogout}
+        onOpenSettings={() => setPage('settings')}
       />
     )
   }
