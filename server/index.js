@@ -39,7 +39,6 @@ async function initDb() {
       UNIQUE (user_id, dealer_name)
     )
   `)
-  await pool.query(`ALTER TABLE dealers ADD COLUMN IF NOT EXISTS connected BOOLEAN NOT NULL DEFAULT FALSE`)
 
   // Varsayılan admin kullanıcısı
   const hash = crypto.createHash('sha256').update('admin123').digest('hex')
